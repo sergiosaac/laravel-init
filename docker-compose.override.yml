@@ -1,0 +1,39 @@
+version: "2"
+
+services:
+    mysql:
+        image: mysql:8
+        ports:
+            - "33066:3306"
+        environment:
+            MYSQL_USER: admin
+            MYSQL_PASSWORD: admin
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: abmaltamasivahb
+        volumes:
+            - db-data:/var/lib/mysql
+
+        restart: always
+
+    nginx:
+        environment:
+            VIRTUAL_HOST: testing.local
+        ports:
+            - "82:80"
+        volumes:
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./public:/app/public
+            - ./storage/app/public:/app/public/storage
+
+    php:
+        build:
+            target: dev
+        depends_on:            
+            - mysql
+        volumes:
+            - ./:/app
+            - ./docker/php/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
+            - ./storage/app/public:/app/public/storage
+
+volumes:
+    db-data:
